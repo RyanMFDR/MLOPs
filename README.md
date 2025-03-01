@@ -1,6 +1,6 @@
 # MLOPs Kelompok 'Ber-3'
 
-## Anggota
+### 🧍Anggota
 - Ryan Muhammad Firdaus		(225150207111076)
 - Arion Syemael Siahaan		(225150207111060)
 - Ashbahul Danna Yunas		(225150201111022)
@@ -10,14 +10,35 @@ Pada projek ini, Kami berfokus dalam Analisis Tren Topik dalam Jurnal PTIIK 2023
 
 🔗 **https://docs.google.com/document/d/1RCNP4xn6RzWeGiKqxZQ76S2KLyuNqenUCKmMNqGPgsI/edit?tab=t.0**
 
----
+### 📊 Sumber Data
 
-## 🛠️ Tools yang Digunakan
+🔗 **https://j-ptiik.ub.ac.id/index.php/j-ptiik/issue/archive**
+
+---
+### 🗃️ Struktur Direktori
+
+MLOPs/
+
+   │── data/                 #Data hasil scraping
+
+   │── notebooks/            #Jupyter Notebook
+
+   │── README.md             #Dokumentasi proyek
+
+   │── requirements.txt      #Dependencies untuk scraping dan preprocessing
+
+   │── .gitignore            #File yang di-ignore 
+
+
+---
+### 🛠️ Tools yang Digunakan
 - **[WebScraper.io]([https://chrome.google.com/webstore/detail/web-scraper](https://webscraper.io/))** untuk scraping data.
-- **NLTK / spaCy** untuk preprocessing teks.
+- **NLTK** untuk preprocessing teks.
 - **Pandas** untuk manipulasi data.
 
-## 🌐 Proses Scraping Data
+---
+
+### 🌐 Proses Scraping Data
 1. **Install WebScraper Chrome Extension**
    ![image](https://github.com/user-attachments/assets/1f184410-cedc-4e25-a59c-5242fdd6cd6c)
 
@@ -33,6 +54,6 @@ Pada projek ini, Kami berfokus dalam Analisis Tren Topik dalam Jurnal PTIIK 2023
    ![image](https://github.com/user-attachments/assets/91922931-55b5-4c69-8e57-44379c305185)
 4. **Export data menjadi CSV**
    ![image](https://github.com/user-attachments/assets/172a5f41-bb58-49a4-a575-6ba58a1dc54c)
-
-## 🛠️ Preprocessing Data
+---
+### 💻 Preprocessing Data
 1. 
