@@ -1,6 +1,6 @@
 # MLOPs Kelompok 'Ber-3'
 
-##Anggota
+## Anggota
 - Ryan Muhammad Firdaus		(225150207111076)
 - Arion Syemael Siahaan		(225150207111060)
 - Ashbahul Danna Yunas		(225150201111022)
