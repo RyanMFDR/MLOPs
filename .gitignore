@@ -1,3 +1,7 @@
 venv/
 __pycache__/
 
+log_sukses.txt
+log_gagal.txt
+
+
