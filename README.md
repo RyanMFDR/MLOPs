@@ -23,7 +23,7 @@ Pada projek ini, Kami berfokus dalam Analisis Tren Topik dalam Jurnal PTIIK 2023
 | ---------- | ---------------------------------------------------- | -------------- |
 | 2025-04-15 | **5. Implementasi Topic Modelling**                  | 🟨 On Progress |
 | 2025-04-15 | **4. Services**                                      | 🟨 On Progress |
-| 2025-04-15 | **3.2 Update Eksplorasi Data & Feature Engineering** | 🟨 On Progress |
+| 2025-04-15 | **3.2 Update Eksplorasi Data & Feature Engineering** | ✅ Selesai     |
 | 2025-04-15 | **3.1 Update Scrapper**                              | ✅ Selesai     |
 | 2025-03-23 | **3. Eksplorasi Data**                               | ✅ Selesai     |
 | 2025-03-01 | **2. Preprocessing**                                 | ✅ Selesai     |
