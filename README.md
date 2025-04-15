@@ -22,7 +22,8 @@ Pada projek ini, Kami berfokus dalam Analisis Tren Topik dalam Jurnal PTIIK 2023
 | Tanggal    | Update Proyek                                        | Status         |
 | ---------- | ---------------------------------------------------- | -------------- |
 | 2025-04-15 | **5. Implementasi Topic Modelling**                  | 🟨 On Progress |
-| 2025-04-15 | **4. Services**                                      | 🟨 On Progress |
+| 2025-04-15 | **4.2 Docker**                                       | 🟨 On Progress |
+| 2025-04-15 | **4.1 FastAPI**                                      | 🟨 On Progress |
 | 2025-04-15 | **3.2 Update Eksplorasi Data & Feature Engineering** | ✅ Selesai     |
 | 2025-04-15 | **3.1 Update Scrapper**                              | ✅ Selesai     |
 | 2025-03-23 | **3. Eksplorasi Data**                               | ✅ Selesai     |
@@ -118,3 +119,10 @@ Setelah data dikumpulkan melalui proses scraping, langkah selanjutnya adalah mem
 #### 5. **Penyimpanan Data yang Sudah Diproses**
 
 - Setelah seluruh langkah preprocessing selesai, data yang sudah dibersihkan dan diproses disimpan ke dalam format yang siap digunakan, seperti **CSV**, agar mudah diakses dan digunakan dalam analisis lebih lanjut.
+
+### 🤳DOKUMENTASI
+
+**Uji Coba POSTMAN**
+![alt text](image-1.png)
+
+![alt text](image-2.png)
