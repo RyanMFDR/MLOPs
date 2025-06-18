@@ -5,49 +5,40 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.base import BaseEstimator, TransformerMixin
 
-# Pastikan resource NLTK tersedia
-nltk.download('punkt')
-
-# Inisialisasi komponen Sastrawi
+# Inisialisasi komponen Sastrawi (bisa diletakkan di luar agar tidak diinisialisasi ulang terus-menerus)
+nltk.download('punkt', quiet=True)
 stopword_factory = StopWordRemoverFactory()
 stopwords_sastrawi = set(stopword_factory.get_stop_words())
 stemmer = StemmerFactory().create_stemmer()
 
-# Custom Transformer untuk pipeline
 class TextPreprocessor(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        pass
+    def __init__(self, text_columns):
+        if not isinstance(text_columns, list):
+            raise ValueError("'text_columns' harus dalam bentuk list, contoh: ['Title', 'Abstrak']")
+        self.text_columns = text_columns
 
     def fit(self, X, y=None):
         return self
 
-    def transform(self, X):
-        return X.apply(self._preprocess)
+    def transform(self, X, y=None):
+        # Pastikan X adalah DataFrame
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("Input untuk transformer ini harus berupa pandas DataFrame.")
+
+        # Salin untuk menghindari mengubah DataFrame asli
+        X_copy = X.copy()
+        
+        # Gabungkan kolom teks yang ditentukan menjadi satu kolom
+        combined_text = X_copy[self.text_columns].fillna('').agg(' '.join, axis=1)
+        
+        # Terapkan fungsi _preprocess ke kolom gabungan tersebut
+        return combined_text.apply(self._preprocess)
 
     def _preprocess(self, text):
         text = text.lower()
         tokens = word_tokenize(text)
+        # Filter token: harus alphabet dan bukan stopword
         tokens = [t for t in tokens if t.isalpha() and t not in stopwords_sastrawi]
+        # Lakukan stemming
         tokens = [stemmer.stem(t) for t in tokens]
         return ' '.join(tokens)
-
-# Fungsi untuk load & bersihkan dataset
-def load_and_preprocess_dataset(path):
-    df = pd.read_csv(path)
-
-    # Hapus kolom 'Link' jika ada
-    if 'Link' in df.columns:
-        df.drop(columns=['Link'], inplace=True)
-
-    # Ganti NaN jadi string kosong
-    df.fillna('', inplace=True)
-
-    # Inisialisasi pipeline
-    preprocessor = TextPreprocessor()
-
-    # Terapkan ke kolom teks
-    df['Judul_clean'] = preprocessor.transform(df['Judul'])
-    df['Keyword_clean'] = preprocessor.transform(df['Keyword'])
-    df['Abstrak_clean'] = preprocessor.transform(df['Abstrak'])
-
-    return df

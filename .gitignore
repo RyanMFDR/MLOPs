@@ -4,4 +4,4 @@ __pycache__/
 log_sukses.txt
 log_gagal.txt
 
-
+env/

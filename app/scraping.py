@@ -2,14 +2,16 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import time
 import csv
+import os
+import re
 
-def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
+def run_scraping(csv_file_path="data/dataset.csv", log_dir="log"):
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
     import os
 
     # --- Konfigurasi awal ---
-    PATH = r"C:\Users\RyanMFDR\Downloads\chromedriver-win64\chromedriver-win64\chromedriver.exe"
+    PATH = os.path.abspath("chromedriver.exe")
     MAX_RETRY = 2
     WAIT = 5
 
@@ -25,21 +27,38 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
     driver.get("https://j-ptiik.ub.ac.id/index.php/j-ptiik/issue/archive")
     time.sleep(3)
 
-    # Scroll Lazy Loading
-    last_height = driver.execute_script("return document.body.scrollHeight")
+    
+
+    # Title
+    all_links = []
+
     while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
+        # Scroll Lazy Loading
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+        # Ambil title
+        titles = driver.find_elements(By.CLASS_NAME, "title")
+        hrefs = [(title.text.strip(), title.get_attribute('href')) for title in titles if title.text.strip()]
+        all_links.extend(hrefs)
+
+        print(f"📄 Dapat {len(hrefs)} link dari halaman ini")
+        try:
+            next_button = driver.find_element(By.CLASS_NAME, "next")
+            next_href = next_button.get_attribute("href")
+            if not next_href:
+                break
+            driver.get(next_href)
+            time.sleep(1.5)
+        except:
+            print("DONE!, Total jurnal: ", len(all_links))
             break
-        last_height = new_height
-
-    # Ambil semua link
-    titles = driver.find_elements(By.CLASS_NAME, "title")
-    hrefs = [(title.text.strip(), title.get_attribute('href')) for title in titles if title.text.strip() != ""]
-
-    print(f"\n✅ Total link ditemukan: {len(hrefs)}\n")
 
     # LOGGING
     success_log = open(f"{log_dir}/log_sukses.txt", "w", encoding="utf-8")
@@ -48,9 +67,17 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
     # Simpan ke CSV
     with open(csv_file_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Judul", "Penulis", "Tanggal", "Keyword", "Abstrak", "Link"])
+        writer.writerow(["Title", 
+                         "Abstrak", 
+                         "Authors", 
+                         "Journal_Conference_Name",
+                         "Publisher", 
+                         "Year", 
+                         "Publication_Date",
+                         "Keyword",
+                         "Link"])
 
-        for label, link in hrefs:
+        for label, link in all_links:
             attempt = 0
             while attempt < MAX_RETRY:
                 try:
@@ -58,6 +85,17 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
                     print(f"✅ Berhasil mengunjungi: {label}")
                     success_log.write(f"{label} - {link}\n")
                     time.sleep(WAIT)
+
+                    # Ambil nama jurnal dan tahun dari deskripsi edisi
+                    try:
+                        deskripsi_elem = driver.find_element(By.CSS_SELECTOR, ".description.text-muted p")
+                        journal_info = deskripsi_elem.text.strip()
+                        journal_conference_name = journal_info  # seluruh deskripsi
+                        match = re.search(r"\b(20\d{2})\b", journal_info)
+                        year = match.group(1) if match else "Unknown"
+                    except:
+                        journal_conference_name = "Tidak ditemukan"
+                        year = "Unknown"
 
                     # Artikel
                     articles = driver.find_elements(By.XPATH, "//a[starts-with(@id, 'article-')]")
@@ -71,10 +109,18 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
                         time.sleep(2)
 
                         try:
-                            # Judul
+                            #Title
                             judul = driver.find_element(By.CLASS_NAME, "page_title").text.strip()
 
-                            # Penulis
+                            #Abstrak
+                            try:
+                                abstrak_section = driver.find_element(By.CLASS_NAME, "abstract")
+                                abstrak_paragraphs = abstrak_section.find_elements(By.TAG_NAME, "p")
+                                abstrak = abstrak_paragraphs[0].text.strip() if abstrak_paragraphs else "Tidak ditemukan"
+                            except:
+                                abstrak = "Tidak ditemukan"
+
+                            #Authors
                             authors_ul = driver.find_element(By.CLASS_NAME, "authors")
                             authors_li = authors_ul.find_elements(By.TAG_NAME, "li")
                             penulis = []
@@ -90,18 +136,28 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
                                 penulis.append(f"{nama} ({affil})")
                             penulis_str = ", ".join(penulis)
 
-                            # Tanggal publikasi
-                            tanggal = driver.find_element(By.XPATH, "/html/body/main/div[1]/article/div/div[2]/div[2]/section/div/span").text.strip()
-
+                            #Publication Date
+                            try:
+                                tanggal = driver.find_element(By.XPATH, "/html/body/main/div[1]/article/div/div[2]/div[2]/section/div/span").text.strip()
+                                tanggal = driver.find_element(By.XPATH,"/html/body/main/div[1]/article/div/div[2]/div[1]/section/div/span:").text.strip()
+                            except:
+                                tanggal = "Tidak ditemukan"
+                            
                             # Abstrak
                             try:
-                                abstrak_section = driver.find_element(By.CLASS_NAME, "abstract")
-                                abstrak_paragraphs = abstrak_section.find_elements(By.TAG_NAME, "p")
-                                abstrak = abstrak_paragraphs[0].text.strip() if abstrak_paragraphs else "Tidak ditemukan"
+                                value_elements = driver.find_elements(By.CLASS_NAME, "value")
+                                for val in value_elements:
+                                    label = val.find_element(By.XPATH, "..").text.lower()
+                                    if "published" in label or "terbit" in label:
+                                        tanggal = val.text.strip()
+                                        break
+                                else:
+                                    tanggal = "Tidak ditemukan"
                             except:
-                                abstrak = "Tidak ditemukan"
+                                tanggal = "Tidak ditemukan"
 
-                            # Keyword
+
+                            #Keyword
                             try:
                                 keyword_section = driver.find_element(By.CLASS_NAME, "keywords")
                                 keyword = keyword_section.find_element(By.CLASS_NAME, "value").text.strip()
@@ -109,13 +165,21 @@ def run_scraping(csv_file_path="../data/dataset.csv", log_dir="log"):
                                 keyword = "Tidak tersedia"
 
                             # Simpan ke CSV
-                            writer.writerow([judul, penulis_str, tanggal, keyword, abstrak, art_link])
+                            writer.writerow([judul, 
+                                             abstrak,
+                                             penulis_str,
+                                             journal_conference_name, 
+                                             "J-PTIIK",
+                                             year, 
+                                             tanggal, 
+                                             keyword, 
+                                             art_link])
                             print(f"✅ CSV Updated")
 
                         except Exception as e:
                             print("❌ Error mengambil data artikel:", e)
 
-                    break  # keluar dari retry loop
+                    break
 
                 except Exception as e:
                     attempt += 1
