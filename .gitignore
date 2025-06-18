@@ -1,7 +1,21 @@
-venv/
-__pycache__/
-
-log_sukses.txt
-log_gagal.txt
-
+# Virtual environment
 env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Log files
+log/
+
+# Jupyter checkpoints (opsional, kalau kamu pakai notebook)
+.ipynb_checkpoints/
+
+# VSCode settings (opsional)
+.vscode/
+
+# MacOS junk (opsional)
+.DS_Store
+
+chromedriver.exe

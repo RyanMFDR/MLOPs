@@ -25,3 +25,12 @@ def read_data():
         return JSONResponse(status_code=404, content={"status": "error", "message": "File tidak ditemukan"})
     except Exception as e:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+# 3. Endpoint topic modeling
+@app.get("/run-topic-modeling")
+def run_topic_modeling():
+    try:
+        result = subprocess.run(["python", "app/modelling.py"], capture_output=True, text=True)
+        return {"status": "success", "message": result.stdout}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
