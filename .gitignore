@@ -19,3 +19,5 @@ log/
 .DS_Store
 
 chromedriver.exe
+
+models/bertopic_model/

@@ -90,7 +90,7 @@ def start_metrics_server(port: int = 8000):
 
 if __name__ == "__main__":
     # --- Konfigurasi ---
-    DATA_PATH = "data/dataset_clean.csv" # Path ke data bersih Anda
+    DATA_PATH = "../data/dataset_clean.csv" # Path ke data bersih Anda
     COLUMNS_TO_PROCESS = ['Title', 'Abstrak'] # Kolom yang akan digabung
     EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
     MIN_TOPIC_SIZE = 5
