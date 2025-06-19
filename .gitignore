@@ -20,4 +20,8 @@ log/
 
 chromedriver.exe
 
-models/bertopic_model/
+models/bertopic_model
+
+mlruns/
+
+wandb/
