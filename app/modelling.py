@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
             # Log model ke wandb
             artifact = wandb.Artifact("bertopic_model", type="model")
-            artifact.add_file(model_path)
+            artifact.add_filed(model_path)
             wandb.log_artifact(artifact)
 
             print("\n--- Ringkasan Topik yang Ditemukan ---")
