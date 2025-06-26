@@ -1,0 +1,62 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "BERTopic Monitoring Dashboard",
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+      {
+        "type": "stat",
+        "title": "Training Duration (s)",
+        "targets": [
+          {
+            "expr": "model_training_duration_seconds_sum",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "type": "stat",
+        "title": "Coherence Score (c_v)",
+        "targets": [
+          {
+            "expr": "topic_model_coherence_score_cv",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "type": "stat",
+        "title": "Diversity Score",
+        "targets": [
+          {
+            "expr": "topic_model_diversity_score",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus",
+        "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 }
+      },
+      {
+        "type": "stat",
+        "title": "Total Topics",
+        "targets": [
+          {
+            "expr": "bertopic_total_topics",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus",
+        "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 }
+      }
+    ]
+  },
+  "overwrite": true
+}

@@ -1,5 +1,5 @@
 outs:
-- md5: f8fa5fa56537ef3e7ee9d5af541a9756
-  size: 523703497
+- md5: 05cfcc477b8b07c1a134ba0612838609
+  size: 523754682
   hash: md5
   path: bertopic_model

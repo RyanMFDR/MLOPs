@@ -7,7 +7,12 @@ from sentence_transformers import SentenceTransformer
 from gensim.corpora import Dictionary
 from gensim.models.coherencemodel import CoherenceModel
 import threading
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import start_http_server, Gauge, Summary
+
+coherence_gauge = Gauge('topic_model_coherence_score_cv', 'C_V Coherence Score dari BERTopic Model')
+diversity_gauge = Gauge('topic_model_diversity_score', 'Diversity Score dari BERTopic Model')
+TOTAL_TOPICS = Gauge('bertopic_total_topics', 'Jumlah total topik unik yang dihasilkan oleh BERTopic')
+training_duration = Summary('model_training_duration_seconds', 'Waktu pelatihan model BERTopic')
 
 def load_and_prepare_data(file_path: str, text_columns: list) -> pd.DataFrame:
     if not os.path.exists(file_path):
@@ -21,6 +26,7 @@ def load_and_prepare_data(file_path: str, text_columns: list) -> pd.DataFrame:
     print("Data berhasil dimuat dan kolom 'text_gabungan' telah dibuat.")
     return df
 
+@training_duration.time()
 def train_bertopic_model(docs: list, embedding_model_name: str, min_topic_size: int) -> BERTopic:
     print(f"Melatih model BERTopic dengan embedding '{embedding_model_name}'...")
     embedding_model = SentenceTransformer(embedding_model_name)
@@ -58,6 +64,25 @@ def calculate_coherence_score(topic_model: BERTopic, docs: list) -> float:
     coherence_score = coherence_model.get_coherence()
     print(f"Coherence Score (c_v): {coherence_score:.4f}")
     return coherence_score
+
+def calculate_diversity_score(topic_model: BERTopic, top_n_words: int = 10) -> float:
+    print("Menghitung Diversity Score...")
+    topics = topic_model.get_topics()
+    all_words = []
+
+    for topic_id, words in topics.items():
+        if topic_id == -1:
+            continue
+        selected_words = [word for word, _ in words[:top_n_words]]
+        all_words.extend(selected_words)
+
+    total_words = len(all_words)
+    unique_words = len(set(all_words))
+
+    diversity_score = unique_words / total_words if total_words > 0 else 0
+    print(f"Diversity Score: {diversity_score:.4f}")
+    return diversity_score
+
 
 def save_artifacts(topic_model: BERTopic, df_with_topics: pd.DataFrame, output_dir: str):
     print(f"Menyimpan artefak ke folder '{output_dir}'...")
@@ -103,10 +128,8 @@ if __name__ == "__main__":
         })
 
         start_metrics_server()
-        coherence_gauge = Gauge('topic_model_coherence_score_cv', 'C_V Coherence Score dari BERTopic Model')
-
         df = load_and_prepare_data(DATA_PATH, COLUMNS_TO_PROCESS)
-
+        
         if df is not None:
             docs = df['text_gabungan'].tolist()
             model, topics = train_bertopic_model(docs, EMBEDDING_MODEL, MIN_TOPIC_SIZE)
@@ -116,12 +139,20 @@ if __name__ == "__main__":
             wandb.log({"coherence_score": coherence})
             coherence_gauge.set(coherence)
 
+            diversity = calculate_diversity_score(model)
+            mlflow.log_metric("diversity_score", diversity)
+            wandb.log({"diversity_score": diversity})
+            diversity_gauge.set(diversity)
+
+            n_topics = len(set(topics)) - (1 if -1 in topics else 0)
+            TOTAL_TOPICS.set(n_topics)
+
             df['Topic'] = topics
             model_path = save_artifacts(model, df, MODEL_OUTPUT_DIR)
 
             # Log model ke wandb
             artifact = wandb.Artifact("bertopic_model", type="model")
-            artifact.add_filed(model_path)
+            artifact.add_file(model_path)
             wandb.log_artifact(artifact)
 
             print("\n--- Ringkasan Topik yang Ditemukan ---")

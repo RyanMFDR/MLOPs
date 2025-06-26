@@ -25,3 +25,5 @@ models/bertopic_model
 mlruns/
 
 wandb/
+
+prometheus.exe
